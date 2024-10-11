@@ -19,15 +19,24 @@ class DatabaseHandler:
 
     def insert_value(self, table_name: str, values: tuple) -> None:
         query = f""" INSERT INTO {table_name} VALUES {values} """
-        self.cur.execute(query)
-        return self.con.commit()
+        return self.cur.execute(query)
+
 
     def transfer_to_database(self, table_name: str, df: pd.DataFrame) -> None:
         pbar = tqdm.tqdm(desc="Transfering...", dynamic_ncols=True, colour="green", mininterval=1, total=len(df))
-        for index , (user_id, action, created_at, source_event_id, device_id, post_page_offset, tokens, post_index_in_post_list, post_token) in df.iterrows():
-            values = (user_id, action, created_at, source_event_id, device_id, post_page_offset, tokens, post_index_in_post_list, post_token) 
+        for index , (user_id, action,
+                created_at, source_event_id,
+                device_id, post_page_offset,
+                tokens, post_index_in_post_list,
+                post_token) in df.iterrows():
+            values = (user_id, action, created_at,
+                    source_event_id, device_id,
+                    post_page_offset, tokens,
+                    post_index_in_post_list,
+                    post_token) 
             self.insert_value(table_name, values)
             pbar.update(1) 
+        return self.con.commit()
 
     def __exit__(self):
         cur.close()
