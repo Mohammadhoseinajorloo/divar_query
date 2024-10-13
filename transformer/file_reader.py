@@ -10,6 +10,4 @@ class FileReader:
 
     def read_excel(self) -> pd.DataFrame:
         df = pd.read_excel(self.name + "." + self.ext)
-        df.reset_index(inplace=True)
-        df.rename(columns={'index':'user_id'}, inplace=True)
         return df.fillna("-")

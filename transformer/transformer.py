@@ -1,6 +1,9 @@
-from parser import args
+import sys
+sys.path.append("../")
+
 from database import DatabaseHandler
 from file_reader import FileReader
+from parser import args
 import pandas as pd
 
 
