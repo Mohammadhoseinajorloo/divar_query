@@ -3,3 +3,9 @@ data/Divar_task/HW4_data_transformation.pdf
 data/Divar_task/divar_data.xlsx
 divar.db
 __pycache__/
+
+# documentation
+Makefile
+build/
+make.bat
+source/
