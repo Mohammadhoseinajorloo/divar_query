@@ -1,71 +1,33 @@
-# Excel to SQLite Transformer
+### Initial Data Exploration and Identification of Potential Errors
 
-This program is designed to transfer data from an Excel file into an SQLite database. It reads the contents of the specified Excel file and inserts the data into the corresponding table in the SQLite database, creating the database if it doesn't already exist. The tool is useful for database initialization, data migration, or integrating Excel data into an SQL-based application.
+During the initial exploration of the data, it was observed that the `action` column in both the `load_post_page_df` and `click_post_df` tables consists of two distinct values: **`load_post_page`** and **`click_post`**. These two values represent different actions taken by users—loading a page and clicking on a post, respectively. Since these actions are complementary but represent distinct events, they should be separated for analysis to better understand user behavior in each scenario. This separation is crucial to ensure accurate insights into user engagement and interaction patterns.
 
-## Features
-- **Excel File Parsing**: Reads data from one or multiple sheets in an Excel file.
-- **SQLite Integration**: Automatically creates and connects to an SQLite database.
-- **Column Mapping**: Matches Excel columns to SQLite table fields.
-- **Data Validation**: Ensures proper data types and handles errors gracefully.
-- **Batch Insertion**: Efficiently inserts data into the SQLite database in batches.
-- **Error Handling**: Captures and logs any issues during data transfer.
+In addition to this observation, several data issues were identified that may impact the quality of analysis. Below are five key errors discovered in the data, along with suggested methods for visualizing them.
 
-## Prerequisites
+#### 1. Missing Values
+In the `device_id` column of both tables, missing values were found. These missing entries can cause issues in analysis, particularly when trying to group users by their device types. If not handled properly, missing `device_id` values can lead to incomplete insights about user segmentation.
 
-Make sure you have the following Python packages installed:
-- `openpyxl`: For reading `.xlsx` files.
-- `sqlite3`: A standard library in Python for SQLite operations.
-- `argparse`: A standard library in Python for command-line argument parsing.
+![](./image/heatmap.png)
 
-You can install the necessary external dependencies using:
+#### 2. Invalid Values
+In the `post_page_offset` column, there are values like 0, which might be considered invalid or inconsistent. This column represents the number of pages a user has browsed, and a value of 0 might imply that no pages were viewed, which conflicts with the "load-post-page" action.
 
-```bash
-pip install -r requairment.txt
-```
+![](./image/scatter.png)
 
-## Usage
+#### 3. Record Mismatch
+A notable issue is the mismatch in the number of records between the two tables. The `load_post_page_df` table contains 35,287 records, while the `click_post_df` table has 75,796 records. This difference suggests some events may not have been tracked consistently across both actions, which could lead to incomplete analyses if not addressed.
 
-To run the script, use the following command:
+#### 4. Outliers
+In the `post_index_in_post_list` column of the `click_post_df` table, there are abnormally large values that could be classified as outliers. These extreme values might indicate either unusual user behavior or potential data entry errors, which could distort the analysis if left unexamined.
 
-```bash
-python transformer.py -t <path_to_excel_file> <path_to_sqlite_db>
-```
+![](./image/boxplot.png)
 
-- `<path_to_excel_file>`: Path to the Excel file (e.g., `data.xlsx`).
-- `<path_to_sqlite_db>`: Path to the SQLite database (e.g., `database.db`). If the database does not exist, the program will create it.
+#### 5. Duplicate Records
+There is a possibility of duplicate records in both tables, which could skew the analysis if not handled properly. Duplicate records artificially inflate the data and may lead to inaccurate conclusions if they aren’t removed.
 
-### Example
+![](./image/barplot.png)
 
-```bash
-python transformer.py -t data.xlsx database.db
-```
+---
 
-This command will:
-1. Parse the `data.xlsx` file.
-2. Create (or connect to) `database.db`.
-3. Insert the data from the Excel file into a table in the SQLite database.
-
-### Command-line Options
-
-| Flag                    | Arguments                              | Description                                        |
-|-------------------------|----------------------------------------|----------------------------------------------------|
-| `-t`, `--transform`      | `<EXCEL_FILE> <SQLITE_DB>`             | Transforms Excel data into an SQLite database.     |
-
-## Script Structure
-
-- **Excel File Parsing**: The program uses the `openpyxl` library to read Excel files. It can handle both `.xlsx` and `.xls` formats.
-- **SQLite Database Management**: It uses Python's built-in `sqlite3` module to manage SQLite databases. If the database file doesn't exist, it creates a new one.
-- **Batch Insertion**: Data from the Excel file is inserted into the SQLite database in batches to improve performance.
-
-## Error Handling
-
-If there are any errors during the transformation (e.g., invalid data, connection issues), they will be logged for further analysis. Make sure to review the error logs for debugging.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Feel free to contribute by submitting a pull request or opening an issue to improve functionality or add new features.
-
+### Conclusion
+By separating the `load_post_page` and `click_post` actions for analysis and addressing the identified data issues, the quality of insights derived from the data will be significantly improved. Using visual tools such as heatmaps, scatter plots, and box plots, we can effectively display these errors and communicate the necessary steps to clean the data for further analysis. This preparation is vital for ensuring that the datasets are ready for more advanced exploration and accurate results.
