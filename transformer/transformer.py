@@ -20,13 +20,11 @@ def transfering_excle_to_database(file: str, db: str) -> None:
 
     click_post_df = df[df.action == "click_post"]
     click_post_df = click_post_df.drop(columns=["tokens", "post_page_offset"])
-    click_post_df = click_post_df.iloc[:, 4:]
-    click_post_df = click_post_df.reset_index(names="id")
 
     # trnsfer data excel file and insert in sqlite database
     databasehander = DatabaseHandler(db)
     databasehander.create("load_post_page_action", load_post_page_df.columns)
-    databasehander.create("click_post_action", click_post_df.columns, "id", "load_post_page_action", "source_event_id")
+    databasehander.create("click_post_action", click_post_df.columns, "source_event_id", "load_post_page_action", "source_event_id")
     
     databasehander.transfer("load_post_page_action", load_post_page_df)
     databasehander.transfer("click_post_action", click_post_df)
