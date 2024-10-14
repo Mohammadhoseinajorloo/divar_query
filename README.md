@@ -29,5 +29,27 @@ There is a possibility of duplicate records in both tables, which could skew the
 
 ---
 
+#### Dark Query Percent (less than 10 results): **98.75%**
+The **Dark Query Percent** refers to the percentage of queries where fewer than 10 results were displayed to the user. In this analysis, we found that **98.75%** of the queries returned less than 10 results.
+
+##### How we calculated this:
+1. We filtered the data from the `load_post_page_action` table to identify instances where the `post_page_offset` (indicating the number of pages or results viewed) was less than 10.
+2. We then calculated the total number of unique queries by counting distinct `source_event_id`s in the dataset.
+3. Finally, the percentage of dark queries was computed by dividing the number of queries with fewer than 10 results by the total number of queries, multiplied by 100 to express it as a percentage.
+
+This high percentage indicates that the vast majority of queries returned a small number of results, which might suggest a need to improve the system's ability to fetch more relevant content or expand the scope of the queries.
+
+
+#### Bounce Rate: **37.05%**
+The **Bounce Rate** measures the percentage of queries where users did not click on any of the results. A bounce can be defined as when a user views the results of a query but leaves without interacting further by clicking on a post.
+
+##### How we calculated this:
+1. We performed a join between the `load_post_page_action` table and the `click_post_action` table using the `source_event_id` as a foreign key.
+2. Queries that appeared in the `load_post_page_action` table but had no corresponding entries in the `click_post_action` table were considered "bounced" (i.e., no clicks occurred).
+3. We then divided the number of bounced queries by the total number of queries to get the bounce rate.
+
+This rate of **37.05%** suggests that over a third of all queries resulted in no user engagement through clicks. This could be an indicator that either the displayed results weren't relevant enough or that users quickly found what they were looking for without needing to click further.
+
+
 ### Conclusion
 By separating the `load_post_page` and `click_post` actions for analysis and addressing the identified data issues, the quality of insights derived from the data will be significantly improved. Using visual tools such as heatmaps, scatter plots, and box plots, we can effectively display these errors and communicate the necessary steps to clean the data for further analysis. This preparation is vital for ensuring that the datasets are ready for more advanced exploration and accurate results.
