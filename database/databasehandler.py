@@ -105,9 +105,9 @@ class DatabaseHandler:
         TypeError
             If the 'columns' parameter is not of type list.
         """
-        query = self.qg.summons (table_name, columns, colfil, where)
+        query = self.qg.soummons (table_name, columns, colfil, where)
 
-        self.cur.execute(query, where)
+        self.cur.execute(query)
 
         headers = [x[0] for x in self.cur.description]
         data = self.cur.fetchall()
