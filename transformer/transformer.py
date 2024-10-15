@@ -1,6 +1,7 @@
 import sys
+import os
 
-WORK_DIR = '/home/mohammad/Documents/EDUCATIONAL/data_science/divar_task'
+WORK_DIR = os.getcwd()
 sys.path.append(WORK_DIR)
 
 from database import DatabaseHandler
