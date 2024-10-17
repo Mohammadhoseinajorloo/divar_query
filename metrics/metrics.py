@@ -2,19 +2,17 @@ from .painter import DrawPlot
 import pandas as pd
 
 class Metrics:
-    def __init__(self, load_post_page_action: pd.DataFrame, click_post_action: pd.DataFrame):
-        self.lppa = load_post_page_action
-        self.cpa = click_post_action
+    def __init__(self, query_df: pd.DataFrame):
+        self.qd = query_df
         self.dp = DrawPlot()
 
-    def ctr(self) -> float:
-        post_page_offset_count = self.lppa.groupby("source_event_id")["post_page_offset"].agg("count").reset_index(name="Post_Page_Offset_Count")
-        post_page_offset_count["Ad_Count"] = post_page_offset_count.Post_Page_Offset_Count * 24
-        post_token_count = self.cpa.groupby("source_event_id")["post_token"].agg("count").reset_index(name="Post_Token_count")
-        result = pd.merge(post_page_offset_count, post_token_count, on="source_event_id", how="left")
-        result.fillna(0, inplace=True)
-        result["Click_Percentage"] = round((result.Post_Token_count / result.Ad_Count) * 100 , 2)
-        return result.Click_Percentage.mean()
+    def ctr(self) -> pd.DataFrame:
+        drop_not_clicked = self.qd[self.qd.post_token == "NOTCLICKED"]
+        ad_clicked = drop_not_clicked.groupby("source_event_id")["post_token"].nunique()
+        ad_loaded = self.qd.groupby("source_event_id")["post_page_offset"].nunique() * 24
+        ctr_df = pd.merge(ad_clicked, ad_loaded, on="source_event_id", how="left")
+        ctr_df ["CTR"] = round(( ctr_df.post_token / ctr_df.post_page_offset) * 100, 2)
+        return ctr_df
 
 
     def avrage_distanc_click_rank(self, draw_plot: bool=False, type_plot="dist") -> pd.DataFrame:
