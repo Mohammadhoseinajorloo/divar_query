@@ -34,12 +34,12 @@ if __name__ == "__main__":
     divar_query_df.fillna({"device_id_click": "NODEVICE"}, inplace=True)
     divar_query_df.dropna(subset=["device_id_load"], inplace=True)
 
-    divar_query_metric = divar_query_df.groupby("source_event_id").size().reset_index(name="query_count")
+    divar_query_metric = pd.DataFrame(divar_query_df.source_event_id.unique(), columns=["source_event_id"])
     # Calculate Four Metric User Bihavior Analysis
     met = Metrics(divar_query_df)
 
     # Calculate Click-Througe Rate
-    divar_query_metric = met.ctr()
+    divar_query_metric ["click-througe rate (CTR)"] = met.ctr()
 
 '''
     adcr = met.avrage_distanc_click_rank()

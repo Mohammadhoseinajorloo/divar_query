@@ -1,5 +1,6 @@
 from .painter import DrawPlot
 import pandas as pd
+import numpy as np
 
 class Metrics:
     def __init__(self, query_df: pd.DataFrame):
@@ -7,12 +8,16 @@ class Metrics:
         self.dp = DrawPlot()
 
     def ctr(self) -> pd.DataFrame:
-        drop_not_clicked = self.qd[self.qd.post_token == "NOTCLICKED"]
-        ad_clicked = drop_not_clicked.groupby("source_event_id")["post_token"].nunique()
-        ad_loaded = self.qd.groupby("source_event_id")["post_page_offset"].nunique() * 24
-        ctr_df = pd.merge(ad_clicked, ad_loaded, on="source_event_id", how="left")
-        ctr_df ["CTR"] = round(( ctr_df.post_token / ctr_df.post_page_offset) * 100, 2)
-        return ctr_df
+        filled_nan = self.qd.replace("NOTCLICKED", np.nan)
+
+        unique_page = filled_nan.drop_duplicates(subset=["source_event_id", "post_page_offset"])
+        unique_page ["lentokens_per_page"] = unique_page["tokens"].apply(lambda x: len(x[1:-1].split(",")))
+        ad_loaded = unique_page.groupby("source_event_id")["lentokens_per_page"].sum().reset_index(name="ad_loaded")
+        ad_clicked = filled_nan.groupby("source_event_id")["post_token"].apply(lambda x:  x.dropna().nunique()).reset_index(name="ad_clicked")
+        return round((ad_clicked.ad_clicked / ad_loaded.ad_loaded) * 100 , 2)
+
+        
+
 
 
     def avrage_distanc_click_rank(self, draw_plot: bool=False, type_plot="dist") -> pd.DataFrame:
