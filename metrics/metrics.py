@@ -9,7 +9,6 @@ class Metrics:
 
     def ctr(self) -> pd.DataFrame:
         filled_nan = self.qd.replace("NOTCLICKED", np.nan)
-
         unique_page = filled_nan.drop_duplicates(subset=["source_event_id", "post_page_offset"])
         unique_page ["lentokens_per_page"] = unique_page["tokens"].apply(lambda x: len(x[1:-1].split(",")))
         ad_loaded = unique_page.groupby("source_event_id")["lentokens_per_page"].sum().reset_index(name="ad_loaded")
@@ -17,8 +16,11 @@ class Metrics:
         return round((ad_clicked.ad_clicked / ad_loaded.ad_loaded) * 100 , 2)
 
         
-
-
+    def pfc(self) -> pd.DataFrame:
+        filled_nan = self.qd.replace("NOINDEX", np.nan)
+        pfc = filled_nan.groupby('source_event_id')['post_index_in_post_list'].apply(lambda x: x.fillna(0).min()).reset_index(name="pfc")
+        return pfc.pfc
+        
 
     def avrage_distanc_click_rank(self, draw_plot: bool=False, type_plot="dist") -> pd.DataFrame:
         combined_df = pd.merge(self.lppa, self.cpa, on="source_event_id", how="left")
@@ -46,17 +48,6 @@ class Metrics:
         return result
 
 
-    def first_click_rank(self, draw_plot: bool=False) -> pd.DataFrame:
-        merge_df = pd.merge(self.lppa, self.cpa, on="source_event_id", how="left")
-        click_count_df = merge_df.groupby("source_event_id")["action_y"].agg("count").reset_index(name="Click_count")
-        click_more_one_index = click_count_df[click_count_df.Click_count >= 1].index
-        click_more_one_df = merge_df.iloc[click_more_one_index]
-        first_click_ranks = click_more_one_df.groupby("source_event_id")["post_index_in_post_list"].agg("min")
-
-        if draw_plot:
-            self.dp.draw_kdeplot(first_click_ranks)
-
-        return first_click_ranks
 
 
     def dark_query(self) -> float:
