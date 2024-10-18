@@ -22,14 +22,14 @@ class Metrics:
         return pfc.pfc
 
 
-    def acpg(self) -> pd.DataFrame:
+    def acpg(self) -> pd.Series:
         filled_nan = self.qd.replace("NOINDEX", np.nan)
         unique_rank = filled_nan.groupby("source_event_id")["post_index_in_post_list"].unique().apply(lambda x: round(np.mean(x), 2)).reset_index(name="acpg")
         unique_rank.fillna({"acpg": 0}, inplace=True)
         return unique_rank.acpg
             
 
-    def is_click_top_tree_rate(self):
+    def is_click_top_tree_rate(self) -> pd.Series:
         filled_nan = self.qd.replace("NOINDEX", np.nan)
         click_on_top_3 = filled_nan[filled_nan['post_index_in_post_list'].between(1, 3)]
         top_3_clicks = click_on_top_3.groupby('source_event_id')['post_index_in_post_list'].count() > 0
@@ -37,17 +37,15 @@ class Metrics:
         return result.is_click_top_tree
 
 
-    def dark_query(self) -> float:
-        dark_queries = self.lppa[self.lppa.post_page_offset < 10]
-        dark_query_count = dark_queries.source_event_id.nunique()
-        total_query_count = self.lppa.source_event_id.nunique()
-        return (dark_query_count / total_query_count) * 100
+    def dark_query_percent(self) -> float:
+        result_counts = self.qd.groupby('source_event_id')['post_page_offset'].nunique()
+        dark_queries = result_counts[result_counts < 10]
+        dark_query_percent = (len(dark_queries) / result_counts.size) * 100
+        return round(dark_query_percent, 2)
 
 
-    def bunose_rank(self):
-        load_queries = self.lppa["source_event_id"].unique()
-        clicked_queries = self.cpa["source_event_id"].unique()
-        bounced_queries = set(load_queries) - set(clicked_queries)
-        bounced_coount = len(bounced_queries)
-        total_load_coount = len(load_queries)
-        return (bounced_coount / total_load_coount) * 100 if total_load_coount > 0 else 0
+    def bounce_rate_percent(self):
+        grouped = self.qd.groupby('source_event_id')
+        no_click_queries = grouped.apply(lambda x: (x['post_token'] == "NOTCLICKED").all())
+        bounce_rate = (no_click_queries.sum() / len(grouped)) * 100
+        return round(bounce_rate, 2)
