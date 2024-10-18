@@ -45,10 +45,13 @@ if __name__ == "__main__":
     # Position of first click
     divar_query_metric ["position of first click (PFC)"] = met.pfc()
 
+    # Avrage click position gap
+    divar_query_metric ["avrage click positon gap (ACPG)"] = met.acpg()
+
+    # Top-3 click rate
+    divar_query_metric ["is_click_top_tree_rate?"] = met.is_click_top_tree_rate()
+
 '''
-    adcr = met.avrage_distanc_click_rank()
-    click_percentage = met.click_perc()
-    fcr = met.first_click_rank()
     dq = met.dark_query()
     br = met.bunose_rank()
 '''

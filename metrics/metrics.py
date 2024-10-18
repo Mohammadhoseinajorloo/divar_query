@@ -7,7 +7,7 @@ class Metrics:
         self.qd = query_df
         self.dp = DrawPlot()
 
-    def ctr(self) -> pd.DataFrame:
+    def ctr(self) -> float:
         filled_nan = self.qd.replace("NOTCLICKED", np.nan)
         unique_page = filled_nan.drop_duplicates(subset=["source_event_id", "post_page_offset"])
         unique_page ["lentokens_per_page"] = unique_page["tokens"].apply(lambda x: len(x[1:-1].split(",")))
@@ -16,38 +16,25 @@ class Metrics:
         return round((ad_clicked.ad_clicked / ad_loaded.ad_loaded) * 100 , 2)
 
         
-    def pfc(self) -> pd.DataFrame:
+    def pfc(self) -> pd.Series:
         filled_nan = self.qd.replace("NOINDEX", np.nan)
         pfc = filled_nan.groupby('source_event_id')['post_index_in_post_list'].apply(lambda x: x.fillna(0).min()).reset_index(name="pfc")
         return pfc.pfc
-        
 
-    def avrage_distanc_click_rank(self, draw_plot: bool=False, type_plot="dist") -> pd.DataFrame:
-        combined_df = pd.merge(self.lppa, self.cpa, on="source_event_id", how="left")
-        avrage_click_rank = combined_df.groupby("source_event_id")["post_index_in_post_list"].agg("mean").reset_index(name="Avrage_Click_Rank")
-        avrage_click_rank.fillna(0, inplace=True)
 
-        if draw_plot:
-            self.dp.draw_boxplot(avrage_click_rank, type_plot)
-        
-        return avrage_click_rank
+    def acpg(self) -> pd.DataFrame:
+        filled_nan = self.qd.replace("NOINDEX", np.nan)
+        unique_rank = filled_nan.groupby("source_event_id")["post_index_in_post_list"].unique().apply(lambda x: round(np.mean(x), 2)).reset_index(name="acpg")
+        unique_rank.fillna({"acpg": 0}, inplace=True)
+        return unique_rank.acpg
             
 
-    def click_perc(self, draw_plot: bool=False, type_plot="grouped") -> pd.DataFrame:
-        post_page_offset_count = self.lppa.groupby("source_event_id")["post_page_offset"].agg("count").reset_index(name="Post_Page_Offset_Count")
-        post_page_offset_count["Ad_Count"] = post_page_offset_count.Post_Page_Offset_Count * 24
-        post_token_count = self.cpa.groupby("source_event_id")["post_token"].agg("count").reset_index(name="Post_Token_count")
-        result = pd.merge(post_page_offset_count, post_token_count, on="source_event_id", how="left")
-        result.fillna(0, inplace=True)
-        result["Click_Percentage"] = round((result.Post_Token_count / result.Ad_Count) * 100 , 2)
-
-
-        if draw_plot:
-            self.dp.draw_barplot(result, type_plot)
-
-        return result
-
-
+    def is_click_top_tree_rate(self):
+        filled_nan = self.qd.replace("NOINDEX", np.nan)
+        click_on_top_3 = filled_nan[filled_nan['post_index_in_post_list'].between(1, 3)]
+        top_3_clicks = click_on_top_3.groupby('source_event_id')['post_index_in_post_list'].count() > 0
+        result = top_3_clicks.reindex(filled_nan['source_event_id'].unique(), fill_value=False).reset_index(name="is_click_top_tree")
+        return result.is_click_top_tree
 
 
     def dark_query(self) -> float:
