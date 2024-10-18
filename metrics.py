@@ -1,11 +1,9 @@
-from .painter import DrawPlot
 import pandas as pd
 import numpy as np
 
 class Metrics:
     def __init__(self, query_df: pd.DataFrame):
         self.qd = query_df
-        self.dp = DrawPlot()
 
     def ctr(self) -> float:
         filled_nan = self.qd.replace("NOTCLICKED", np.nan)

@@ -53,8 +53,6 @@ if __name__ == "__main__":
 
     # Dark query percent
     dark_query_percent = met.dark_query_percent()
-    print(f"Dark_Query_Percent: {dark_query_percent}%")
 
     # Bounce rate 
     bounce_rate_percent = met.bounce_rate_percent()
-    print(f"Bounce_Rate: {bounce_rate_percent}%")
